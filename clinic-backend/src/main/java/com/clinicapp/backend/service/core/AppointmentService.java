@@ -8,7 +8,9 @@ import com.clinicapp.backend.model.security.Role;
 import com.clinicapp.backend.model.security.User;
 import com.clinicapp.backend.repository.core.AppointmentRepository;
 import com.clinicapp.backend.repository.core.PatientRepository;
+import com.clinicapp.backend.model.notification.Notification; // Import Notification model
 import com.clinicapp.backend.repository.security.UserRepository;
+import com.clinicapp.backend.service.notification.NotificationService; // Import NotificationService
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository; // To fetch doctor details
+    private final NotificationService notificationService; // Inject NotificationService
 
     private static final long CANCELLATION_NOTICE_HOURS = 24; // Configurable notice period
 
@@ -157,6 +160,23 @@ public class AppointmentService {
                 .build();
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        // --- Send Notifications ---
+        // Notify Doctor
+        notificationService.createNotification(
+                doctor,
+                Notification.NotificationType.APPOINTMENT_MODIFIED, // Or a more specific type like APPOINTMENT_CREATED
+                "New Appointment Scheduled",
+                String.format("New appointment with %s %s at %s",
+                        patient.getFirstName(), patient.getLastName(), savedAppointment.getStartTime()),
+                "APPOINTMENT",
+                savedAppointment.getId()
+        );
+        // Notify Patient (Optional - depends on requirements)
+        // Consider if patients have User accounts or if notifications are handled differently
+        // If patients are Users:
+        // notificationService.createNotification(patient.getUserAccount(), ...);
+
         return mapToDTO(savedAppointment);
     }
 
@@ -193,6 +213,21 @@ public class AppointmentService {
         // updatedAt handled by @PreUpdate
 
         Appointment updatedAppointment = appointmentRepository.save(existingAppointment);
+
+        // --- Send Notifications ---
+        // Notify Doctor
+        notificationService.createNotification(
+                doctor,
+                Notification.NotificationType.APPOINTMENT_MODIFIED,
+                "Appointment Updated",
+                String.format("Appointment with %s %s at %s has been updated.",
+                        patient.getFirstName(), patient.getLastName(), updatedAppointment.getStartTime()),
+                "APPOINTMENT",
+                updatedAppointment.getId()
+        );
+        // Notify Patient (Optional)
+        // notificationService.createNotification(patient.getUserAccount(), ...);
+
         return mapToDTO(updatedAppointment);
     }
 
@@ -217,6 +252,21 @@ public class AppointmentService {
 
          appointment.setStatus(AppointmentStatus.CANCELLED);
          Appointment cancelledAppointment = appointmentRepository.save(appointment);
+ 
+         // --- Send Notifications ---
+         // Notify Doctor
+         notificationService.createNotification(
+                 cancelledAppointment.getDoctor(),
+                 Notification.NotificationType.APPOINTMENT_CANCELLED,
+                 "Appointment Cancelled",
+                 String.format("Appointment with %s %s at %s has been cancelled.",
+                         cancelledAppointment.getPatient().getFirstName(), cancelledAppointment.getPatient().getLastName(), cancelledAppointment.getStartTime()),
+                 "APPOINTMENT",
+                 cancelledAppointment.getId()
+         );
+         // Notify Patient (Optional)
+         // notificationService.createNotification(cancelledAppointment.getPatient().getUserAccount(), ...);
+ 
          return mapToDTO(cancelledAppointment);
      }
 
