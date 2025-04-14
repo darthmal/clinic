@@ -1,5 +1,6 @@
 package com.clinicapp.backend.service.security;
 
+import com.clinicapp.backend.model.security.User; // Import User model
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -66,9 +67,12 @@ public class JwtService {
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+        // Cast UserDetails to our User type to access email
+        String email = (userDetails instanceof User) ? ((User) userDetails).getEmail() : userDetails.getUsername();
+
         return Jwts.builder()
                 .claims(extraClaims)
-                .subject(userDetails.getUsername()) // Set username as subject
+                .subject(email) // Use email as subject
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), Jwts.SIG.HS256) // Use the signing key
@@ -80,8 +84,10 @@ public class JwtService {
      * Checks if the username matches and the token is not expired.
      */
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        final String email = extractUsername(token); // This now extracts the email (subject)
+        // Compare extracted email with the email from UserDetails (after casting)
+        String userDetailsEmail = (userDetails instanceof User) ? ((User) userDetails).getEmail() : userDetails.getUsername();
+        return (email.equals(userDetailsEmail)) && !isTokenExpired(token);
     }
 
     /**

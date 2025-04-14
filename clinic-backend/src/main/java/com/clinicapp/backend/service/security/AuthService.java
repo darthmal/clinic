@@ -67,19 +67,20 @@ public class AuthService {
         // This will use our UserDetailsServiceImpl and PasswordEncoder
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
+                        request.getEmail(), // Use email from LoginRequest
                         request.getPassword()
                 )
         );
 
-        // If authentication is successful, find the user (should exist)
-        var user = userRepository.findByUsername(request.getUsername())
+        // If authentication is successful, find the user by email
+        var user = userRepository.findByEmail(request.getEmail()) // Find by email
                 .orElseThrow(() -> new IllegalStateException("User not found after successful authentication")); // Should not happen
 
         // Generate JWT token
         var jwtToken = jwtService.generateToken(user);
         return AuthResponse.builder()
                 .token(jwtToken)
+                .user(user) // Add the user object to the response
                 .build();
     }
 }

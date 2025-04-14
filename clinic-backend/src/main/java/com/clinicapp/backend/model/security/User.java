@@ -1,5 +1,6 @@
 package com.clinicapp.backend.model.security;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; // Import JsonIgnore
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -57,6 +58,7 @@ public class User implements UserDetails {
     // --- UserDetails Implementation ---
 
     @Override
+    @JsonIgnore // Ignore this during JSON serialization
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Return a list containing the user's role as a GrantedAuthority
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name())); // Prefix with ROLE_ for Spring Security convention
@@ -74,21 +76,25 @@ public class User implements UserDetails {
     }
 
     @Override
+    @JsonIgnore // Ignore this during JSON serialization
     public boolean isAccountNonExpired() {
         return true; // Or add logic for account expiration
     }
 
     @Override
+    @JsonIgnore // Ignore this during JSON serialization
     public boolean isAccountNonLocked() {
         return true; // Or add logic for account locking
     }
 
     @Override
+    @JsonIgnore // Ignore this during JSON serialization
     public boolean isCredentialsNonExpired() {
         return true; // Or add logic for password expiration
     }
 
     @Override
+    @JsonIgnore // Ignore this during JSON serialization
     public boolean isEnabled() {
         return true; // Or add logic for disabling accounts
     }

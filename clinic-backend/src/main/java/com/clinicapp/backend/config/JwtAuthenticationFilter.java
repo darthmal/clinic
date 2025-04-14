@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String username;
+        final String userEmail; // Change variable name for clarity
 
         // 1. Check if Authorization header exists and starts with "Bearer "
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -45,13 +45,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
 
         try {
-            // 3. Extract username from JWT
-            username = jwtService.extractUsername(jwt);
+            // 3. Extract user email from JWT (assuming JwtService is updated or already does this)
+            userEmail = jwtService.extractUsername(jwt); // Keep using extractUsername, but ensure it returns email
 
-            // 4. Check if username exists and user is not already authenticated
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // 5. Load UserDetails from the database
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            // 4. Check if email exists and user is not already authenticated
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // 5. Load UserDetails from the database using the email
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail); // Pass email here
 
                 // 6. Validate the token
                 if (jwtService.isTokenValid(jwt, userDetails)) {

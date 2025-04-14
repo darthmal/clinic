@@ -1,9 +1,11 @@
 package com.clinicapp.backend.repository.security;
 
+import com.clinicapp.backend.model.security.Role; // Import Role enum
 import com.clinicapp.backend.model.security.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List; // Import List
 import java.util.Optional;
 
 @Repository
@@ -25,4 +27,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     Optional<User> findByEmail(String email);
 
+    /**
+     * Finds all users with a specific role.
+     *
+     * @param role The role to search for.
+     * @return A List containing the users with the specified role.
+     */
+    List<User> findByRole(Role role);
 }
