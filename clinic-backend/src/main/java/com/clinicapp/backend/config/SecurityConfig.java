@@ -36,20 +36,28 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtAuthenticationFilter jwtAuthFilter; // Inject the JWT filter
 
+    // Define constants for Swagger paths
+    private static final String[] SWAGGER_WHITELIST = {
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable and configure CORS
                 .csrf(AbstractHttpConfigurer::disable) // Disable CSRF (common for stateless APIs)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Explicitly allow ADMIN access to user endpoints here for diagnostics
+                        .requestMatchers("/api/v1/auth/**").permitAll() // Allow auth endpoints
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll() // Allow Swagger endpoints
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow all OPTIONS requests (for CORS preflight)
+                        // Explicitly allow ADMIN access to user endpoints here for diagnostics (Can be removed if @PreAuthorize works)
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/admin/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/admin/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/users/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated() // Require authentication for all other requests
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS)) // Use stateless sessions for JWT
                 .authenticationProvider(authenticationProvider()) // Set the custom authentication provider
