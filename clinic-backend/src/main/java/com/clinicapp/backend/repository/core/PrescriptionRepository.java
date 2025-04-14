@@ -23,4 +23,7 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
 
     // Find prescriptions issued within a date range
     List<Prescription> findByPrescriptionDateBetween(LocalDate startDate, LocalDate endDate);
+
+    // Count prescriptions issued by a specific doctor (Needed for DashboardService)
+    long countByDoctorId(Long doctorId);
 }

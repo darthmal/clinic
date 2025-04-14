@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.Set; // Import Set for distinct IDs
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
@@ -74,4 +74,19 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
      boolean existsOtherAppointmentForPatientOnDate(
              @Param("patient") Patient patient,
              @Param("date") LocalDate date);
+
+   // --- Methods needed for DashboardService ---
+
+   // Count appointments on a specific date
+   @Query("SELECT COUNT(a) FROM Appointment a WHERE FUNCTION('DATE', a.startTime) = :date")
+   long countByAppointmentDate(@Param("date") LocalDate date);
+
+   // Count appointments for a specific doctor on a specific date
+   @Query("SELECT COUNT(a) FROM Appointment a WHERE a.doctor.id = :doctorId AND FUNCTION('DATE', a.startTime) = :date")
+   long countByDoctorIdAndAppointmentDate(@Param("doctorId") Long doctorId, @Param("date") LocalDate date);
+
+   // Find distinct patient IDs associated with a specific doctor via appointments
+   @Query("SELECT DISTINCT a.patient.id FROM Appointment a WHERE a.doctor.id = :doctorId")
+   Set<Long> findDistinctPatientIdsByDoctorId(@Param("doctorId") Long doctorId);
+
 }
