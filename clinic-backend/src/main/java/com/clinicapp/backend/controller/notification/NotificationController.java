@@ -8,9 +8,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +25,7 @@ import java.util.stream.Collectors;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     /**
      * Get paginated notifications for the authenticated user.
@@ -80,6 +86,90 @@ public class NotificationController {
     ) {
         notificationService.markAllAsRead(user);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * WebSocket: Send a notification to a specific user (private notification)
+     * Client sends to: /app/notification.private
+     * Backend delivers to: /user/{recipient}/queue/notifications
+     */
+    @MessageMapping("/notification.private")
+    public void sendPrivateNotification(
+            @Payload NotificationDTO notificationDTO,
+            Principal principal
+    ) {
+        if (notificationDTO.getSender() == null) {
+            notificationDTO.setSender(principal.getName());
+        }
+        if (notificationDTO.getCreatedAt() == null) {
+            notificationDTO.setCreatedAt(Instant.now());
+        }
+        if (notificationDTO.getRecipient() == null) {
+            throw new IllegalArgumentException("Recipient required");
+        }
+        // Send to recipient
+        messagingTemplate.convertAndSendToUser(
+                notificationDTO.getRecipient(),
+                "/queue/notifications",
+                notificationDTO
+        );
+        // Optionally, send to sender as well
+        messagingTemplate.convertAndSendToUser(
+                principal.getName(),
+                "/queue/notifications",
+                notificationDTO
+        );
+    }
+
+    /**
+     * WebSocket: Broadcast a notification to all users (if needed)
+     * Client sends to: /app/notification.broadcast
+     * Backend delivers to: /topic/notifications
+     */
+    @MessageMapping("/notification.broadcast")
+    public void broadcastNotification(@Payload NotificationDTO notificationDTO, Principal principal) {
+        if (notificationDTO.getSender() == null) {
+            notificationDTO.setSender(principal.getName());
+        }
+        if (notificationDTO.getCreatedAt() == null) {
+            notificationDTO.setCreatedAt(Instant.now());
+        }
+        messagingTemplate.convertAndSend("/topic/notifications", notificationDTO);
+    }
+
+    /**
+     * Test endpoint to send a notification to a specific user
+     * This is for testing only and should be removed in production
+     */
+    @PostMapping("/test-notification")
+    public ResponseEntity<Void> sendTestNotification(
+            @RequestParam String recipientEmail,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        try {
+            // Create a test notification DTO
+            NotificationDTO testNotification = NotificationDTO.builder()
+                    .id(0L)  // Will be ignored when saving
+                    .type(Notification.NotificationType.SYSTEM_NOTIFICATION)
+                    .title("Test Notification")
+                    .message("This is a test notification sent at " + Instant.now())
+                    .createdAt(Instant.now())
+                    .read(false)
+                    .sender(currentUser.getEmail())
+                    .recipient(recipientEmail)
+                    .build();
+            
+            // Send via WebSocket
+            messagingTemplate.convertAndSendToUser(
+                    recipientEmail,
+                    "/queue/notifications",
+                    testNotification
+            );
+            
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
     }
 
     /**

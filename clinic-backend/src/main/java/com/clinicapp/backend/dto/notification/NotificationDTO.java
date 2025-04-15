@@ -21,4 +21,6 @@ public class NotificationDTO {
     private boolean read;
     private String referenceType;
     private Long referenceId;
+    private String sender; // NEW: sender's email
+    private String recipient; // NEW: recipient's email
 }

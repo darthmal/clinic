@@ -148,6 +148,8 @@ public class NotificationService {
                 .read(notification.isRead())
                 .referenceType(notification.getReferenceType())
                 .referenceId(notification.getReferenceId())
+                .recipient(notification.getRecipient().getEmail()) // Add recipient email for WebSocket routing
+                .sender("system") // Set a default sender
                 .build();
     }
 }
