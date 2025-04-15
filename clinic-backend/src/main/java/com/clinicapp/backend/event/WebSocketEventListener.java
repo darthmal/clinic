@@ -24,6 +24,11 @@ public class WebSocketEventListener {
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         logger.info("Received a new web socket connection");
+        if (event.getUser() != null) {
+            logger.info("WebSocket CONNECT principal: " + event.getUser().getName());
+        } else {
+            logger.info("WebSocket CONNECT principal: null");
+        }
     }
 
     @EventListener

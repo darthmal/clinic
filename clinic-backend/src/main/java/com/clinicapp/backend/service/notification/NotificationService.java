@@ -61,9 +61,17 @@ public class NotificationService {
         // Convert to DTO to avoid circular references and lazy loading issues
         NotificationDTO notificationDTO = convertToDTO(notification);
 
+        System.out.println("WebSocket: Sending notification to " + notification.getRecipient().getEmail() + " with payload: " + notificationDTO);
+
+        // DEBUG: Send a simple string to test frontend delivery
+        messagingTemplate.convertAndSendToUser(
+                notification.getRecipient().getEmail(),
+                "/queue/notifications",
+                "TEST_STRING_NOTIFICATION"
+        );
         // Send to user's private queue
         messagingTemplate.convertAndSendToUser(
-                notification.getRecipient().getEmail(), // Use EMAIL here
+                notification.getRecipient().getEmail(),
                 "/queue/notifications",
                 notificationDTO
         );
