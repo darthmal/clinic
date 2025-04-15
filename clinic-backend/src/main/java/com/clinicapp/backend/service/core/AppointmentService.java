@@ -127,6 +127,19 @@ public class AppointmentService {
                  .collect(Collectors.toList());
      }
 
+     @Transactional(readOnly = true)
+     public List<Appointment> getAppointmentsForDoctorOnDate(Long doctorId, LocalDate date) {
+         // Use the new repository method with JOIN FETCH for patient
+         // No need to fetch Doctor User object first as repo method uses doctorId
+         return appointmentRepository.findByDoctorIdAndDateWithDetails(doctorId, date);
+         // No DTO mapping here as the controller expects List<Appointment>
+     }
+
+     @Transactional(readOnly = true)
+     public List<Appointment> getAppointmentsForDate(LocalDate date) {
+         // Use the new repository method with JOIN FETCH
+         return appointmentRepository.findByAppointmentDateWithDetails(date);
+     }
 
     @Transactional(readOnly = true)
     public AppointmentDTO getAppointmentById(Long id) {

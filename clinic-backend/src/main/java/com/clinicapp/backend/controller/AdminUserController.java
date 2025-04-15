@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')") // Ensure only ADMIN can access these endpoints
+//@PreAuthorize("hasRole('ADMIN')") // Ensure only ADMIN can access these endpoints
 public class AdminUserController {
 
     private final UserService userService; // Inject the user service

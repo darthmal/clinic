@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize; // Import PreAuthorize
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,19 +16,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/appointments") // Base path for appointment endpoints
 @RequiredArgsConstructor
-// TODO: Add role-based security annotations (e.g., @PreAuthorize) later
+@PreAuthorize("isAuthenticated()") // Require authentication at the class level as a baseline
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
 
-    // Consider restricting access based on role (e.g., Admin/Secretary)
+    // Allow all authenticated roles to view lists/specific appointments
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARY', 'DOCTOR')")
     public ResponseEntity<List<AppointmentDTO>> getAllAppointments() {
         List<AppointmentDTO> appointments = appointmentService.getAllAppointments();
         return ResponseEntity.ok(appointments);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARY', 'DOCTOR')")
     public ResponseEntity<AppointmentDTO> getAppointmentById(@PathVariable Long id) {
         try {
             AppointmentDTO appointment = appointmentService.getAppointmentById(id);
@@ -39,6 +42,7 @@ public class AppointmentController {
 
      // Get appointments for a specific doctor
      @GetMapping("/doctor/{doctorId}")
+     @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARY', 'DOCTOR')") // Or maybe just ADMIN/SECRETARY/OWN_DOCTOR?
      public ResponseEntity<List<AppointmentDTO>> getAppointmentsByDoctor(@PathVariable Long doctorId) {
          try {
              List<AppointmentDTO> appointments = appointmentService.getAppointmentsByDoctor(doctorId);
@@ -52,6 +56,7 @@ public class AppointmentController {
 
      // Get appointments for a specific patient
      @GetMapping("/patient/{patientId}")
+     @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARY', 'DOCTOR')") // Or maybe restrict based on relationship?
      public ResponseEntity<List<AppointmentDTO>> getAppointmentsByPatient(@PathVariable Long patientId) {
          try {
              List<AppointmentDTO> appointments = appointmentService.getAppointmentsByPatient(patientId);
@@ -63,6 +68,7 @@ public class AppointmentController {
 
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARY')") // Only Admin/Secretary can create
     public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO) {
         try {
             AppointmentDTO createdAppointment = appointmentService.createAppointment(appointmentDTO);
@@ -78,6 +84,7 @@ public class AppointmentController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARY')") // Only Admin/Secretary can update
     public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @Valid @RequestBody AppointmentDTO appointmentDTO) {
         try {
             AppointmentDTO updatedAppointment = appointmentService.updateAppointment(id, appointmentDTO);
@@ -92,8 +99,8 @@ public class AppointmentController {
         }
     }
 
-    // Use PATCH for partial updates like cancellation
     @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARY')") // Only Admin/Secretary can cancel
     public ResponseEntity<AppointmentDTO> cancelAppointment(@PathVariable Long id) {
          try {
              AppointmentDTO cancelledAppointment = appointmentService.cancelAppointment(id);

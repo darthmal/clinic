@@ -89,4 +89,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
    @Query("SELECT DISTINCT a.patient.id FROM Appointment a WHERE a.doctor.id = :doctorId")
    Set<Long> findDistinctPatientIdsByDoctorId(@Param("doctorId") Long doctorId);
 
+   // Find appointments on a specific date, eagerly fetching patient and doctor
+   @Query("SELECT a FROM Appointment a JOIN FETCH a.patient JOIN FETCH a.doctor WHERE FUNCTION('DATE', a.startTime) = :date ORDER BY a.startTime ASC")
+   List<Appointment> findByAppointmentDateWithDetails(@Param("date") LocalDate date);
+
+   // Find appointments for a specific doctor on a specific date, eagerly fetching patient
+   @Query("SELECT a FROM Appointment a JOIN FETCH a.patient JOIN FETCH a.doctor WHERE a.doctor.id = :doctorId AND FUNCTION('DATE', a.startTime) = :date ORDER BY a.startTime ASC")
+   List<Appointment> findByDoctorIdAndDateWithDetails(@Param("doctorId") Long doctorId, @Param("date") LocalDate date);
 }
