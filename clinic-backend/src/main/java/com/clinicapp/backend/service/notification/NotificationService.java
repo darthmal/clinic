@@ -5,6 +5,7 @@ import com.clinicapp.backend.model.notification.Notification;
 import com.clinicapp.backend.model.security.User;
 import com.clinicapp.backend.repository.notification.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // Import Slf4j for logging
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -17,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
+@Slf4j // Add Slf4j annotation
 @RequiredArgsConstructor
 public class NotificationService {
 
@@ -61,20 +63,20 @@ public class NotificationService {
         // Convert to DTO to avoid circular references and lazy loading issues
         NotificationDTO notificationDTO = convertToDTO(notification);
 
-        System.out.println("WebSocket: Sending notification to " + notification.getRecipient().getEmail() + " with payload: " + notificationDTO);
-
-        // DEBUG: Send a simple string to test frontend delivery
-        messagingTemplate.convertAndSendToUser(
-                notification.getRecipient().getEmail(),
-                "/queue/notifications",
-                "TEST_STRING_NOTIFICATION"
-        );
-        // Send to user's private queue
-        messagingTemplate.convertAndSendToUser(
-                notification.getRecipient().getEmail(),
-                "/queue/notifications",
-                notificationDTO
-        );
+        String destination = "/queue/notifications";
+        String userEmail = notification.getRecipient().getEmail();
+        log.info("Attempting to send notification DTO via WebSocket to user '{}' on destination '{}'. Payload: {}", userEmail, destination, notificationDTO);
+        try {
+            // Send to user's private queue
+            messagingTemplate.convertAndSendToUser(
+                    userEmail,
+                    destination,
+                    notificationDTO
+            );
+            log.info("Successfully sent notification DTO to user '{}'", userEmail);
+        } catch (Exception e) {
+            log.error("Error sending notification DTO via WebSocket to user '{}'", userEmail, e);
+        }
     }
 
     /**
