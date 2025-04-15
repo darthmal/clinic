@@ -1,14 +1,19 @@
 package com.clinicapp.backend.config;
 
+import lombok.RequiredArgsConstructor; // Import RequiredArgsConstructor
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration; // Import ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Configuration
-@EnableWebSocketMessageBroker // Enables WebSocket message handling, backed by a message broker
+@EnableWebSocketMessageBroker
+@RequiredArgsConstructor // Add for injecting the interceptor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final WebSocketAuthInterceptor webSocketAuthInterceptor; // Inject the interceptor
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -41,6 +46,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .withSockJS();
     }
 
-    // TODO: Add WebSocket security configuration later (e.g., using Spring Security)
-    // to ensure only authenticated users can connect and send/receive messages.
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        // Register our custom interceptor to handle authentication
+        registration.interceptors(webSocketAuthInterceptor);
+    }
 }
