@@ -50,8 +50,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Disable CSRF (common for stateless APIs)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll() // Allow auth endpoints
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll() // Allow Swagger endpoints
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow all OPTIONS requests (for CORS preflight)
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        .requestMatchers("/ws/**").permitAll() // Allow WebSocket handshake/SockJS endpoint
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Explicitly allow ADMIN access to user endpoints here for diagnostics (Can be removed if @PreAuthorize works)
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/admin/users/**").hasRole("ADMIN")

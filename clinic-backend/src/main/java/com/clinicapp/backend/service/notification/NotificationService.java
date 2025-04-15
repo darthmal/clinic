@@ -63,7 +63,7 @@ public class NotificationService {
 
         // Send to user's private queue
         messagingTemplate.convertAndSendToUser(
-                notification.getRecipient().getUsername(),
+                notification.getRecipient().getEmail(), // Use EMAIL here
                 "/queue/notifications",
                 notificationDTO
         );
