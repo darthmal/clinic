@@ -19,7 +19,6 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/v1/documents") // Base path for document generation
 @RequiredArgsConstructor
-// TODO: Add role-based security annotations
 public class DocumentController {
 
     private final PdfGenerationService pdfGenerationService;
