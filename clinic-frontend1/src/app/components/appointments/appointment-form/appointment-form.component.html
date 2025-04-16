@@ -1,0 +1,112 @@
+<div class="p-6 bg-white rounded-lg shadow-md max-w-3xl mx-auto">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6">{{ pageTitle }}</h2>
+
+  <!-- Loading Indicator (for edit mode) -->
+  <div *ngIf="isLoading && isEditMode" class="text-center py-4">
+    <p class="text-gray-500">Loading appointment data...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="p-3 mb-4 text-sm text-red-700 bg-red-100 border border-red-400 rounded-md">
+    {{ errorMessage }}
+  </div>
+
+  <form *ngIf="!isLoading || !isEditMode" [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+    <!-- Patient Selection -->
+    <div>
+      <label for="patientId" class="block text-sm font-medium text-gray-700">Patient <span class="text-red-500">*</span></label>
+      <select id="patientId" formControlName="patientId" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              [ngClass]="{ 'border-red-500': appointmentForm.get('patientId')?.invalid && appointmentForm.get('patientId')?.touched }">
+        <option value="" disabled>Select a patient</option>
+        <option *ngFor="let patient of patients$ | async" [value]="patient.id">
+          {{ patient.lastName }}, {{ patient.firstName }} (ID: {{ patient.id }})
+        </option>
+      </select>
+      <div *ngIf="appointmentForm.get('patientId')?.invalid && appointmentForm.get('patientId')?.touched" class="mt-1 text-xs text-red-600">
+        Patient is required.
+      </div>
+    </div>
+
+    <!-- Doctor Selection -->
+    <div>
+      <label for="doctorId" class="block text-sm font-medium text-gray-700">Doctor <span class="text-red-500">*</span></label>
+      <select id="doctorId" formControlName="doctorId" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              [ngClass]="{ 'border-red-500': appointmentForm.get('doctorId')?.invalid && appointmentForm.get('doctorId')?.touched }">
+        <option value="" disabled>Select a doctor</option>
+        <option *ngFor="let doctor of doctors$ | async" [value]="doctor.id">
+          Dr. {{ doctor.lastName }}, {{ doctor.firstName }}
+        </option>
+      </select>
+      <div *ngIf="appointmentForm.get('doctorId')?.invalid && appointmentForm.get('doctorId')?.touched" class="mt-1 text-xs text-red-600">
+        Doctor is required.
+      </div>
+    </div>
+
+    <!-- Start Time -->
+    <div>
+      <label for="startTime" class="block text-sm font-medium text-gray-700">Start Time <span class="text-red-500">*</span></label>
+      <input id="startTime" type="datetime-local" formControlName="startTime" required
+             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+             [ngClass]="{ 'border-red-500': appointmentForm.get('startTime')?.invalid && appointmentForm.get('startTime')?.touched }">
+      <div *ngIf="appointmentForm.get('startTime')?.invalid && appointmentForm.get('startTime')?.touched" class="mt-1 text-xs text-red-600">
+        Start time is required.
+      </div>
+    </div>
+
+    <!-- End Time -->
+    <div>
+      <label for="endTime" class="block text-sm font-medium text-gray-700">End Time <span class="text-red-500">*</span></label>
+      <input id="endTime" type="datetime-local" formControlName="endTime" required
+             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+             [ngClass]="{ 'border-red-500': appointmentForm.get('endTime')?.invalid && appointmentForm.get('endTime')?.touched }">
+       <div *ngIf="appointmentForm.get('endTime')?.invalid && appointmentForm.get('endTime')?.touched" class="mt-1 text-xs text-red-600">
+        End time is required.
+      </div>
+      <!-- TODO: Add validation to ensure end time is after start time -->
+    </div>
+
+     <!-- Room -->
+    <div>
+      <label for="room" class="block text-sm font-medium text-gray-700">Room (Optional)</label>
+      <input id="room" type="text" formControlName="room"
+             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    </div>
+
+    <!-- Notes -->
+    <div>
+      <label for="notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
+      <textarea id="notes" formControlName="notes" rows="4"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+    </div>
+
+     <!-- Status Selection (Only in Edit Mode) -->
+     <div *ngIf="isEditMode">
+       <label for="status" class="block text-sm font-medium text-gray-700">Status <span class="text-red-500">*</span></label>
+       <select id="status" formControlName="status" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': appointmentForm.get('status')?.invalid && appointmentForm.get('status')?.touched }">
+         <!-- Use the appointmentStatuses array exposed from the component -->
+         <option *ngFor="let stat of appointmentStatuses" [value]="stat">{{ stat }}</option>
+       </select>
+       <div *ngIf="appointmentForm.get('status')?.invalid && appointmentForm.get('status')?.touched" class="mt-1 text-xs text-red-600">
+         Status is required.
+       </div>
+     </div>
+
+    <!-- Form Actions -->
+    <div class="flex justify-end space-x-4 pt-4">
+      <button type="button" (click)="goBack()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Cancel
+      </button>
+      <button type="submit" [disabled]="appointmentForm.invalid || isLoading"
+              class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+        <span *ngIf="!isLoading">{{ isEditMode ? 'Update Appointment' : 'Create Appointment' }}</span>
+        <span *ngIf="isLoading">Saving...</span>
+      </button>
+    </div>
+  </form>
+</div>

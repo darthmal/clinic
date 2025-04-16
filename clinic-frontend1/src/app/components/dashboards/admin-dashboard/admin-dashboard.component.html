@@ -1,0 +1,138 @@
+<div class="p-6">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6">Admin Dashboard</h2>
+  <p class="text-gray-600 mb-6">Overview of clinic performance and statistics</p>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="text-center py-10">
+    <p class="text-gray-500">Loading dashboard data...</p>
+    <!-- Add a spinner or animation here if desired -->
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="p-4 mb-6 text-sm text-red-700 bg-red-100 border border-red-400 rounded-md">
+    {{ errorMessage }}
+    <button *ngIf="!errorMessage.startsWith('Access Denied')" (click)="loadDashboardData()" class="ml-2 px-2 py-1 text-xs font-medium text-red-800 bg-red-200 rounded hover:bg-red-300">Retry</button>
+  </div>
+
+  <!-- Main Content Area (Stats Cards & Charts) -->
+  <div *ngIf="!isLoading && !errorMessage">
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Total Patients -->
+      <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+          <!-- Placeholder Icon --> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Total Patients</p>
+          <p class="text-2xl font-semibold text-gray-800">{{ stats?.totalPatients ?? 'N/A' }}</p>
+          <!-- <p class="text-xs text-green-600">+12% from last month</p> --> <!-- Placeholder for change -->
+        </div>
+      </div>
+      <!-- Appointments Today -->
+      <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+         <div class="p-3 rounded-full bg-green-100 text-green-600">
+           <!-- Placeholder Icon --> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+         </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Appointments Today</p>
+          <p class="text-2xl font-semibold text-gray-800">{{ stats?.appointmentsToday ?? 'N/A' }}</p>
+           <!-- <p class="text-xs text-green-600">+8% from last month</p> -->
+        </div>
+      </div>
+      <!-- Monthly Revenue -->
+      <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+         <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+           <!-- Placeholder Icon --> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+         </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Monthly Revenue</p>
+          <p class="text-2xl font-semibold text-gray-800">{{ (stats?.monthlyRevenue ?? 0) | currency:'USD':'symbol' }}</p> <!-- Adjust currency -->
+           <!-- <p class="text-xs text-green-600">+15% from last month</p> -->
+        </div>
+      </div>
+      <!-- Active Staff -->
+      <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+         <div class="p-3 rounded-full bg-indigo-100 text-indigo-600">
+           <!-- Placeholder Icon --> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+         </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Active Staff</p>
+          <p class="text-2xl font-semibold text-gray-800">{{ stats?.activeStaff ?? 'N/A' }}</p>
+           <!-- <p class="text-xs text-gray-500">+2 since last month</p> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Revenue Overview Chart -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Revenue Overview (Current Year)</h3>
+        <div *ngIf="revenueChartData.length > 0" class="chart-container">
+           <ngx-charts-bar-vertical
+             [view]="revenueView"
+             [scheme]="revenueColorScheme"
+             [results]="revenueChartData"
+             [gradient]="revenueGradient"
+             [xAxis]="revenueShowXAxis"
+             [yAxis]="revenueShowYAxis"
+             [legend]="false"
+             [showXAxisLabel]="revenueShowXAxisLabel"
+             [showYAxisLabel]="revenueShowYAxisLabel"
+             [xAxisLabel]="revenueXAxisLabel"
+             [yAxisLabel]="revenueYAxisLabel"
+             (select)="onChartSelect($event)">
+          </ngx-charts-bar-vertical>
+        </div>
+         <p *ngIf="revenueChartData.length === 0" class="text-center text-gray-500 py-4">No revenue data available.</p>
+      </div>
+
+      <!-- Weekly Appointments Chart -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Weekly Appointments (Current Week)</h3>
+         <div *ngIf="appointmentsChartData.length > 0" class="chart-container">
+           <ngx-charts-line-chart
+             [view]="appointmentsView"
+             [scheme]="appointmentsColorScheme"
+             [results]="appointmentsChartData"
+             [gradient]="appointmentsGradient"
+             [xAxis]="appointmentsShowXAxis"
+             [yAxis]="appointmentsShowYAxis"
+             [legend]="false"
+             [showXAxisLabel]="appointmentsShowXAxisLabel"
+             [showYAxisLabel]="appointmentsShowYAxisLabel"
+             [xAxisLabel]="appointmentsXAxisLabel"
+             [yAxisLabel]="appointmentsYAxisLabel"
+             [autoScale]="appointmentsAutoScale"
+             (select)="onChartSelect($event)">
+          </ngx-charts-line-chart>
+        </div>
+         <p *ngIf="appointmentsChartData.length === 0" class="text-center text-gray-500 py-4">No appointment data available.</p>
+      </div>
+    </div>
+
+     <!-- Account Management Link (already implemented) -->
+     <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+       <h3 class="text-lg font-medium text-gray-700">Account Management</h3>
+       <a routerLink="/admin/users" class="inline-block mt-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+         Manage Users (Doctors/Secretaries)
+       </a>
+     </div>
+
+    <!-- Placeholder Sections for Future Implementation -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+       <div class="bg-white p-6 rounded-lg shadow-md">
+         <h3 class="text-lg font-semibold text-gray-700 mb-4">Recent Staff Activity (Placeholder)</h3>
+         <p class="text-gray-500">List of recent actions will go here...</p>
+       </div>
+       <div class="bg-white p-6 rounded-lg shadow-md">
+         <h3 class="text-lg font-semibold text-gray-700 mb-4">Upcoming Tasks (Placeholder)</h3>
+         <p class="text-gray-500">List of tasks will go here...</p>
+       </div>
+    </div>
+
+  </div> <!-- End of main content area -->
+
+</div>

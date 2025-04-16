@@ -1,0 +1,102 @@
+<div class="p-6 bg-white rounded-lg shadow-md max-w-2xl mx-auto">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6">{{ pageTitle }}</h2>
+
+  <!-- Loading Indicator (for edit mode) -->
+  <div *ngIf="isLoading && isEditMode" class="text-center py-4">
+    <p class="text-gray-500">Loading user data...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="p-3 mb-4 text-sm text-red-700 bg-red-100 border border-red-400 rounded-md">
+    {{ errorMessage }}
+  </div>
+
+  <form *ngIf="!isLoading || !isEditMode" [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- First Name -->
+      <div>
+        <label for="firstName" class="block text-sm font-medium text-gray-700">First Name <span class="text-red-500">*</span></label>
+        <input id="firstName" type="text" formControlName="firstName" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched }">
+        <div *ngIf="userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched" class="mt-1 text-xs text-red-600">
+          First name is required.
+        </div>
+      </div>
+
+      <!-- Last Name -->
+      <div>
+        <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name <span class="text-red-500">*</span></label>
+        <input id="lastName" type="text" formControlName="lastName" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched }">
+        <div *ngIf="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched" class="mt-1 text-xs text-red-600">
+          Last name is required.
+        </div>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div>
+      <label for="email" class="block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
+      <input id="email" type="email" formControlName="email" required email
+             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+             [ngClass]="{ 'border-red-500': userForm.get('email')?.invalid && userForm.get('email')?.touched }">
+      <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="mt-1 text-xs text-red-600">
+        <span *ngIf="userForm.get('email')?.errors?.['required']">Email is required.</span>
+        <span *ngIf="userForm.get('email')?.errors?.['email']">Please enter a valid email address.</span>
+      </div>
+    </div>
+
+    <!-- Username -->
+    <div>
+      <label for="username" class="block text-sm font-medium text-gray-700">Username <span class="text-red-500">*</span></label>
+      <input id="username" type="text" formControlName="username" required
+             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+             [ngClass]="{ 'border-red-500': userForm.get('username')?.invalid && userForm.get('username')?.touched }">
+      <div *ngIf="userForm.get('username')?.invalid && userForm.get('username')?.touched" class="mt-1 text-xs text-red-600">
+        Username is required.
+      </div>
+    </div>
+
+    <!-- Role -->
+    <div>
+      <label for="role" class="block text-sm font-medium text-gray-700">Role <span class="text-red-500">*</span></label>
+      <select id="role" formControlName="role" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              [ngClass]="{ 'border-red-500': userForm.get('role')?.invalid && userForm.get('role')?.touched }">
+        <option *ngFor="let roleOpt of availableRoles" [value]="roleOpt">{{ roleOpt }}</option>
+      </select>
+      <div *ngIf="userForm.get('role')?.invalid && userForm.get('role')?.touched" class="mt-1 text-xs text-red-600">
+        Role is required.
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div>
+      <label for="password" class="block text-sm font-medium text-gray-700">
+        Password <span *ngIf="!isEditMode" class="text-red-500">*</span><span *ngIf="isEditMode">(Leave blank to keep current password)</span>
+      </label>
+      <input id="password" type="password" formControlName="password" [required]="!isEditMode"
+             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+             [ngClass]="{ 'border-red-500': userForm.get('password')?.invalid && userForm.get('password')?.touched }">
+      <div *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched && !isEditMode" class="mt-1 text-xs text-red-600">
+        Password is required for new users.
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="flex justify-end space-x-4 pt-4">
+      <button type="button" (click)="goBack()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Cancel
+      </button>
+      <button type="submit" [disabled]="userForm.invalid || isLoading"
+              class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+        <span *ngIf="!isLoading">{{ isEditMode ? 'Update User' : 'Create User' }}</span>
+        <span *ngIf="isLoading">Saving...</span>
+      </button>
+    </div>
+  </form>
+</div>

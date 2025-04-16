@@ -1,0 +1,101 @@
+<div class="p-6 bg-white rounded-lg shadow-md max-w-3xl mx-auto">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6">{{ pageTitle }}</h2>
+
+  <!-- Loading Indicator (less likely needed for create form, but keep for consistency) -->
+  <div *ngIf="isLoading" class="text-center py-4">
+    <p class="text-gray-500">Saving prescription...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="p-3 mb-4 text-sm text-red-700 bg-red-100 border border-red-400 rounded-md">
+    {{ errorMessage }}
+  </div>
+
+  <form *ngIf="prescriptionForm" [formGroup]="prescriptionForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+    <!-- Patient Selection -->
+    <div>
+      <label for="patientId" class="block text-sm font-medium text-gray-700">Patient <span class="text-red-500">*</span></label>
+      <!-- If patientId comes from route, display name instead of input -->
+      <input *ngIf="patientIdFromRoute" type="text" [value]="'Patient ID: ' + patientIdFromRoute" disabled
+             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm">
+      <!-- TODO: Replace with a patient search/select component if patientId is not from route -->
+      <input *ngIf="!patientIdFromRoute" id="patientId" type="number" formControlName="patientId" required placeholder="Enter Patient ID"
+             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+             [ngClass]="{ 'border-red-500': prescriptionForm.get('patientId')?.invalid && prescriptionForm.get('patientId')?.touched }">
+      <div *ngIf="prescriptionForm.get('patientId')?.invalid && prescriptionForm.get('patientId')?.touched" class="mt-1 text-xs text-red-600">
+        Patient is required.
+      </div>
+    </div>
+
+    <!-- Doctor (Hidden/Readonly) -->
+    <input type="hidden" formControlName="doctorId">
+    <!-- Optionally display doctor name -->
+    <!-- <p class="text-sm text-gray-600">Prescribing Doctor ID: {{ currentDoctorId }}</p> -->
+
+    <!-- Medication Details -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="medicationName" class="block text-sm font-medium text-gray-700">Medication Name <span class="text-red-500">*</span></label>
+        <input id="medicationName" type="text" formControlName="medicationName" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': prescriptionForm.get('medicationName')?.invalid && prescriptionForm.get('medicationName')?.touched }">
+        <div *ngIf="prescriptionForm.get('medicationName')?.invalid && prescriptionForm.get('medicationName')?.touched" class="mt-1 text-xs text-red-600">
+          Medication name is required.
+        </div>
+      </div>
+      <div>
+        <label for="dosage" class="block text-sm font-medium text-gray-700">Dosage <span class="text-red-500">*</span></label>
+        <input id="dosage" type="text" formControlName="dosage" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': prescriptionForm.get('dosage')?.invalid && prescriptionForm.get('dosage')?.touched }">
+         <div *ngIf="prescriptionForm.get('dosage')?.invalid && prescriptionForm.get('dosage')?.touched" class="mt-1 text-xs text-red-600">
+          Dosage is required.
+        </div>
+      </div>
+      <div>
+        <label for="frequency" class="block text-sm font-medium text-gray-700">Frequency <span class="text-red-500">*</span></label>
+        <input id="frequency" type="text" formControlName="frequency" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': prescriptionForm.get('frequency')?.invalid && prescriptionForm.get('frequency')?.touched }">
+         <div *ngIf="prescriptionForm.get('frequency')?.invalid && prescriptionForm.get('frequency')?.touched" class="mt-1 text-xs text-red-600">
+          Frequency is required.
+        </div>
+      </div>
+       <div>
+        <label for="prescriptionDate" class="block text-sm font-medium text-gray-700">Prescription Date <span class="text-red-500">*</span></label>
+        <input id="prescriptionDate" type="date" formControlName="prescriptionDate" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': prescriptionForm.get('prescriptionDate')?.invalid && prescriptionForm.get('prescriptionDate')?.touched }">
+         <div *ngIf="prescriptionForm.get('prescriptionDate')?.invalid && prescriptionForm.get('prescriptionDate')?.touched" class="mt-1 text-xs text-red-600">
+          Prescription date is required.
+        </div>
+      </div>
+       <div>
+        <label for="endDate" class="block text-sm font-medium text-gray-700">End Date (Optional)</label>
+        <input id="endDate" type="date" formControlName="endDate"
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div>
+      <label for="instructions" class="block text-sm font-medium text-gray-700">Instructions (Optional)</label>
+      <textarea id="instructions" formControlName="instructions" rows="4"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="flex justify-end space-x-4 pt-4">
+      <button type="button" (click)="goBack()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Cancel
+      </button>
+      <button type="submit" [disabled]="prescriptionForm.invalid || isLoading"
+              class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+        <span *ngIf="!isLoading">Create Prescription</span>
+        <span *ngIf="isLoading">Saving...</span>
+      </button>
+    </div>
+  </form>
+</div>

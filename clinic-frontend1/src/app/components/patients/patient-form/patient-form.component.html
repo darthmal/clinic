@@ -1,0 +1,133 @@
+<div class="p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6">{{ pageTitle }}</h2>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading && isEditMode" class="text-center py-4">
+    <p class="text-gray-500">Loading patient data...</p>
+    <!-- Add a spinner if desired -->
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="p-3 mb-4 text-sm text-red-700 bg-red-100 border border-red-400 rounded-md">
+    {{ errorMessage }}
+  </div>
+
+  <form *ngIf="!isLoading || !isEditMode" [formGroup]="patientForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+    <!-- Personal Information Section -->
+    <fieldset class="border border-gray-300 p-4 rounded-md">
+      <legend class="text-lg font-medium text-gray-700 px-2">Personal Information</legend>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <!-- First Name -->
+        <div>
+          <label for="firstName" class="block text-sm font-medium text-gray-700">First Name <span class="text-red-500">*</span></label>
+          <input id="firstName" type="text" formControlName="firstName" required
+                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                 [ngClass]="{ 'border-red-500': patientForm.get('firstName')?.invalid && patientForm.get('firstName')?.touched }">
+          <div *ngIf="patientForm.get('firstName')?.invalid && patientForm.get('firstName')?.touched" class="mt-1 text-xs text-red-600">
+            First name is required.
+          </div>
+        </div>
+
+        <!-- Last Name -->
+        <div>
+          <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name <span class="text-red-500">*</span></label>
+          <input id="lastName" type="text" formControlName="lastName" required
+                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                 [ngClass]="{ 'border-red-500': patientForm.get('lastName')?.invalid && patientForm.get('lastName')?.touched }">
+           <div *ngIf="patientForm.get('lastName')?.invalid && patientForm.get('lastName')?.touched" class="mt-1 text-xs text-red-600">
+            Last name is required.
+          </div>
+        </div>
+
+        <!-- Date of Birth -->
+        <div>
+          <label for="dateOfBirth" class="block text-sm font-medium text-gray-700">Date of Birth <span class="text-red-500">*</span></label>
+          <input id="dateOfBirth" type="date" formControlName="dateOfBirth" required
+                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                 [ngClass]="{ 'border-red-500': patientForm.get('dateOfBirth')?.invalid && patientForm.get('dateOfBirth')?.touched }">
+           <div *ngIf="patientForm.get('dateOfBirth')?.invalid && patientForm.get('dateOfBirth')?.touched" class="mt-1 text-xs text-red-600">
+            Date of birth is required.
+          </div>
+        </div>
+
+        <!-- Gender -->
+        <div>
+          <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+          <select id="gender" formControlName="gender"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <option value="">Select Gender</option>
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+            <option value="OTHER">Other</option>
+            <option value="UNKNOWN">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Contact Information Section -->
+     <fieldset class="border border-gray-300 p-4 rounded-md">
+      <legend class="text-lg font-medium text-gray-700 px-2">Contact Information</legend>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <!-- Phone Number -->
+        <div>
+          <label for="phoneNumber" class="block text-sm font-medium text-gray-700">Phone Number</label>
+          <input id="phoneNumber" type="tel" formControlName="phoneNumber"
+                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <input id="email" type="email" formControlName="email"
+                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                 [ngClass]="{ 'border-red-500': patientForm.get('email')?.invalid && patientForm.get('email')?.touched && patientForm.get('email')?.errors?.['email'] }">
+           <div *ngIf="patientForm.get('email')?.invalid && patientForm.get('email')?.touched && patientForm.get('email')?.errors?.['email']" class="mt-1 text-xs text-red-600">
+            Please enter a valid email address.
+          </div>
+        </div>
+
+         <!-- Address -->
+        <div class="md:col-span-2">
+          <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+          <textarea id="address" formControlName="address" rows="3"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+        </div>
+      </div>
+    </fieldset>
+
+     <!-- Medical Information Section -->
+     <fieldset class="border border-gray-300 p-4 rounded-md">
+      <legend class="text-lg font-medium text-gray-700 px-2">Medical Information</legend>
+      <div class="grid grid-cols-1 gap-6 mt-4">
+         <!-- Medical History -->
+        <div>
+          <label for="medicalHistory" class="block text-sm font-medium text-gray-700">Medical History</label>
+          <textarea id="medicalHistory" formControlName="medicalHistory" rows="4"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+        </div>
+
+         <!-- Allergies -->
+        <div>
+          <label for="allergies" class="block text-sm font-medium text-gray-700">Allergies</label>
+          <textarea id="allergies" formControlName="allergies" rows="3"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Form Actions -->
+    <div class="flex justify-end space-x-4 pt-4">
+      <button type="button" (click)="goBack()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Cancel
+      </button>
+      <button type="submit" [disabled]="patientForm.invalid || isLoading"
+              class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+        <span *ngIf="!isLoading">{{ isEditMode ? 'Update Patient' : 'Create Patient' }}</span>
+        <span *ngIf="isLoading">Saving...</span>
+      </button>
+    </div>
+  </form>
+</div>

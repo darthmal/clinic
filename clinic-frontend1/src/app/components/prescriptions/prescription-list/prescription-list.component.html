@@ -1,0 +1,56 @@
+<div class="p-6 bg-white rounded-lg shadow-md">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-semibold text-gray-800">Prescription List</h2>
+    <!-- Add New button might go elsewhere (e.g., patient detail view or doctor's workflow) -->
+    <!-- <a routerLink="/prescriptions/new" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Add New</a> -->
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="text-center py-4">
+    <p class="text-gray-500">Loading prescriptions...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="p-3 mb-4 text-sm text-red-700 bg-red-100 border border-red-400 rounded-md">
+    {{ errorMessage }}
+    <button (click)="loadPrescriptions()" class="ml-2 px-2 py-1 text-xs font-medium text-red-800 bg-red-200 rounded hover:bg-red-300">Retry</button>
+  </div>
+
+  <!-- Prescription Table -->
+  <div *ngIf="!isLoading && !errorMessage && (prescriptions$ | async) as prescriptions" class="overflow-x-auto">
+    <table *ngIf="prescriptions.length > 0; else noPrescriptions" class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medication</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dosage</th>
+          <th scope="col" class="relative px-6 py-3">
+            <span class="sr-only">Actions</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let prescription of prescriptions">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ prescription.prescriptionDate | date:'yyyy-MM-dd' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ prescription.patientFirstName }} {{ prescription.patientLastName }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Dr. {{ prescription.doctorLastName }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ prescription.medicationName }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ prescription.dosage }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <!-- Edit might not be standard practice for prescriptions -->
+            <!-- <button (click)="editPrescription(prescription.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button> -->
+            <button (click)="downloadPdf(prescription.id, prescription.patientLastName)" class="text-blue-600 hover:text-blue-900 mr-3">Download PDF</button>
+            <!-- Delete might not be standard practice -->
+            <!-- <button (click)="deletePrescription(prescription.id)" class="text-red-600 hover:text-red-900">Delete</button> -->
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #noPrescriptions>
+      <p class="text-center text-gray-500 py-4">No prescriptions found.</p>
+    </ng-template>
+  </div>
+</div>

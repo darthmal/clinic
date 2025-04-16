@@ -1,0 +1,53 @@
+<div class="p-6 bg-white rounded-lg shadow-md">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-semibold text-gray-800">Patient List</h2>
+    <a routerLink="/patients/new" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      Add New Patient
+    </a>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="text-center py-4">
+    <p class="text-gray-500">Loading patients...</p>
+    <!-- Add a spinner if desired -->
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="p-3 mb-4 text-sm text-red-700 bg-red-100 border border-red-400 rounded-md">
+    {{ errorMessage }}
+    <button (click)="loadPatients()" class="ml-2 px-2 py-1 text-xs font-medium text-red-800 bg-red-200 rounded hover:bg-red-300">Retry</button>
+  </div>
+
+  <!-- Patient Table -->
+  <div *ngIf="!isLoading && !errorMessage && (patients$ | async) as patients" class="overflow-x-auto">
+    <table *ngIf="patients.length > 0; else noPatients" class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Birth</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+          <th scope="col" class="relative px-6 py-3">
+            <span class="sr-only">Actions</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let patient of patients">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ patient.firstName }} {{ patient.lastName }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ patient.dateOfBirth | date:'yyyy-MM-dd' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ patient.phoneNumber || 'N/A' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ patient.email || 'N/A' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <button (click)="editPatient(patient.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
+            <button (click)="deletePatient(patient.id)" class="text-red-600 hover:text-red-900">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #noPatients>
+      <p class="text-center text-gray-500 py-4">No patients found.</p>
+    </ng-template>
+  </div>
+</div>

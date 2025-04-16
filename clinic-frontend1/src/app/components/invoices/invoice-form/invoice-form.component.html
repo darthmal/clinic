@@ -1,0 +1,105 @@
+<div class="p-6 bg-white rounded-lg shadow-md max-w-3xl mx-auto">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6">{{ pageTitle }}</h2>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading && isEditMode" class="text-center py-4">
+    <p class="text-gray-500">Loading invoice data...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="p-3 mb-4 text-sm text-red-700 bg-red-100 border border-red-400 rounded-md">
+    {{ errorMessage }}
+  </div>
+
+  <form *ngIf="!isLoading || !isEditMode" [formGroup]="invoiceForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Patient Selection -->
+      <div>
+        <label for="patientId" class="block text-sm font-medium text-gray-700">Patient <span class="text-red-500">*</span></label>
+        <!-- TODO: Replace with a patient search/select component -->
+        <input id="patientId" type="number" formControlName="patientId" required placeholder="Enter Patient ID"
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': invoiceForm.get('patientId')?.invalid && invoiceForm.get('patientId')?.touched }">
+        <div *ngIf="invoiceForm.get('patientId')?.invalid && invoiceForm.get('patientId')?.touched" class="mt-1 text-xs text-red-600">
+          Patient is required.
+        </div>
+      </div>
+
+      <!-- Appointment Link (Optional) -->
+      <div>
+        <label for="appointmentId" class="block text-sm font-medium text-gray-700">Related Appointment (Optional)</label>
+        <!-- TODO: Replace with an appointment search/select component -->
+        <input id="appointmentId" type="number" formControlName="appointmentId" placeholder="Enter Appointment ID"
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+      </div>
+
+      <!-- Issue Date -->
+      <div>
+        <label for="issueDate" class="block text-sm font-medium text-gray-700">Issue Date <span class="text-red-500">*</span></label>
+        <input id="issueDate" type="date" formControlName="issueDate" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': invoiceForm.get('issueDate')?.invalid && invoiceForm.get('issueDate')?.touched }">
+         <div *ngIf="invoiceForm.get('issueDate')?.invalid && invoiceForm.get('issueDate')?.touched" class="mt-1 text-xs text-red-600">
+          Issue date is required.
+        </div>
+      </div>
+
+      <!-- Due Date -->
+      <div>
+        <label for="dueDate" class="block text-sm font-medium text-gray-700">Due Date <span class="text-red-500">*</span></label>
+        <input id="dueDate" type="date" formControlName="dueDate" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': invoiceForm.get('dueDate')?.invalid && invoiceForm.get('dueDate')?.touched }">
+         <div *ngIf="invoiceForm.get('dueDate')?.invalid && invoiceForm.get('dueDate')?.touched" class="mt-1 text-xs text-red-600">
+          Due date is required.
+        </div>
+      </div>
+
+      <!-- Total Amount -->
+       <div>
+        <label for="totalAmount" class="block text-sm font-medium text-gray-700">Total Amount <span class="text-red-500">*</span></label>
+        <input id="totalAmount" type="number" formControlName="totalAmount" required min="0.01" step="0.01" placeholder="0.00"
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+               [ngClass]="{ 'border-red-500': invoiceForm.get('totalAmount')?.invalid && invoiceForm.get('totalAmount')?.touched }">
+         <div *ngIf="invoiceForm.get('totalAmount')?.invalid && invoiceForm.get('totalAmount')?.touched" class="mt-1 text-xs text-red-600">
+          <span *ngIf="invoiceForm.get('totalAmount')?.errors?.['required']">Total amount is required.</span>
+          <span *ngIf="invoiceForm.get('totalAmount')?.errors?.['min']">Amount must be positive.</span>
+        </div>
+      </div>
+
+       <!-- Status -->
+       <div>
+        <label for="status" class="block text-sm font-medium text-gray-700">Status <span class="text-red-500">*</span></label>
+        <select id="status" formControlName="status" required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                [ngClass]="{ 'border-red-500': invoiceForm.get('status')?.invalid && invoiceForm.get('status')?.touched }">
+          <option *ngFor="let stat of invoiceStatuses" [value]="stat">{{ stat }}</option>
+        </select>
+         <div *ngIf="invoiceForm.get('status')?.invalid && invoiceForm.get('status')?.touched" class="mt-1 text-xs text-red-600">
+          Status is required.
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div>
+      <label for="notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
+      <textarea id="notes" formControlName="notes" rows="4"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="flex justify-end space-x-4 pt-4">
+      <button type="button" (click)="goBack()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Cancel
+      </button>
+      <button type="submit" [disabled]="invoiceForm.invalid || isLoading"
+              class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+        <span *ngIf="!isLoading">{{ isEditMode ? 'Update Invoice' : 'Create Invoice' }}</span>
+        <span *ngIf="isLoading">Saving...</span>
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,65 @@
+<div class="flex flex-col h-[calc(100vh-10rem)] bg-white rounded-lg shadow-md"> <!-- Adjust height as needed -->
+
+  <!-- Header -->
+  <div class="p-4 border-b border-gray-200">
+    <h2 class="text-xl font-semibold text-gray-800">Internal Chat</h2>
+    <p class="text-sm text-gray-500">Status: <span [ngClass]="{
+      'text-green-600': connectionState === 'CONNECTED',
+      'text-yellow-600': connectionState === 'CONNECTING',
+      'text-red-600': connectionState === 'ERROR' || connectionState === 'DISCONNECTED'
+    }">{{ connectionState }}</span></p>
+  </div>
+
+  <!-- Message Display Area -->
+  <div #messageContainer class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50">
+    <div *ngFor="let msg of messages" class="flex" [ngClass]="{'justify-end': msg.sender === currentUserEmail}">
+      <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow"
+           [ngClass]="{
+             'bg-blue-500 text-white': msg.sender === currentUserEmail,
+             'bg-gray-200 text-gray-800': msg.sender !== currentUserEmail && msg.type === 'CHAT',
+             'bg-yellow-100 text-yellow-800 text-sm italic w-full text-center': msg.type === 'JOIN' || msg.type === 'LEAVE'
+           }">
+        <p *ngIf="msg.type === 'CHAT' && msg.sender !== currentUserEmail" class="text-xs font-semibold mb-1">{{ msg.sender }}</p>
+        <p [ngClass]="{'text-sm italic': msg.type !== 'CHAT'}">{{ msg.content }}</p>
+        <p *ngIf="msg.timestamp && msg.type === 'CHAT'" class="text-xs mt-1 opacity-75 text-right">
+          {{ msg.timestamp | date:'shortTime' }}
+        </p>
+      </div>
+    </div>
+     <div *ngIf="messages.length === 0" class="text-center text-gray-400 italic">
+       No messages yet. Start chatting!
+     </div>
+  </div>
+
+  <!-- Message Input Area -->
+  <div class="p-4 border-t border-gray-200 bg-gray-100">
+    <div class="flex items-center space-x-2 mb-2">
+       <label for="recipient" class="text-sm font-medium text-gray-700">To (Email, optional for private):</label>
+       <input
+         id="recipient"
+         type="email"
+         [(ngModel)]="recipientEmail"
+         placeholder="Leave blank for public chat"
+         class="flex-1 px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+       />
+    </div>
+    <div class="flex items-center space-x-2">
+      <input
+        type="text"
+        [(ngModel)]="newMessage"
+        (keyup.enter)="sendMessage()"
+        placeholder="Type your message..."
+        class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        [disabled]="connectionState !== 'CONNECTED'"
+      />
+      <button
+        (click)="sendMessage()"
+        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+        [disabled]="!newMessage.trim() || connectionState !== 'CONNECTED'"
+      >
+        Send
+      </button>
+    </div>
+  </div>
+
+</div>
