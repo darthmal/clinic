@@ -1,12 +1,15 @@
 package com.clinicapp.backend.controller.core;
 
 import com.clinicapp.backend.dto.core.PrescriptionDTO;
+import com.clinicapp.backend.model.security.User;
 import com.clinicapp.backend.service.core.PrescriptionService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/prescriptions") // Base path for prescription endpoints
 @RequiredArgsConstructor
-// TODO: Add role-based security annotations (e.g., @PreAuthorize - likely DOCTOR for create/update/delete)
+@PreAuthorize("hasRole('DOCTOR')")
 public class PrescriptionController {
 
     private final PrescriptionService prescriptionService;
@@ -44,6 +47,18 @@ public class PrescriptionController {
          }
     }
 
+    // Get prescriptions issued by the connected doctor
+    @GetMapping
+    public ResponseEntity<List<PrescriptionDTO>> getPrescriptionsByLoggedInUser() {
+        try {
+            User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            List<PrescriptionDTO> prescriptions = prescriptionService.getPrescriptionsByDoctor(loggedInUser.getId());
+            return ResponseEntity.ok(prescriptions);
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+    
     @GetMapping("/{id}")
     public ResponseEntity<PrescriptionDTO> getPrescriptionById(@PathVariable Long id) {
         try {

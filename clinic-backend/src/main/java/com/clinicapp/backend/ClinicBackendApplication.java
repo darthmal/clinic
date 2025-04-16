@@ -23,7 +23,7 @@ public class ClinicBackendApplication {
 	@Bean
 	public CommandLineRunner createDefaultAdminUser() {
 		return args -> {
-			String adminEmail = "admin@gmail.com";
+			String adminEmail = "admin@admin.com";
 			if (userRepository.findByEmail(adminEmail).isEmpty()) {
 				User adminUser = User.builder()
 						.firstName("Admin")
@@ -31,6 +31,22 @@ public class ClinicBackendApplication {
 						.username("admin")
 						.email(adminEmail)
 							.password(passwordEncoder.encode("password")) // Encode the password
+						.role(Role.ADMIN)
+						.build();
+				User doctorUser = User.builder()
+						.firstName("Murphy")
+						.lastName("Parker")
+						.username("doctor")
+						.email("doctor@doctor.com")
+						.password(passwordEncoder.encode("password")) // Encode the password
+						.role(Role.ADMIN)
+						.build();
+				User secUser = User.builder()
+						.firstName("Alice")
+						.lastName("Parker")
+						.username("secretary")
+						.email("sec@secretary.com")
+						.password(passwordEncoder.encode("password")) // Encode the password
 						.role(Role.ADMIN)
 						.build();
 				userRepository.save(adminUser);

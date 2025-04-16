@@ -58,6 +58,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/admin/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/admin/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/prescriptions/**").hasRole("DOCTOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/prescriptions/**").hasRole("DOCTOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/prescriptions/**").hasRole("DOCTOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/prescriptions").hasRole("DOCTOR")
                         .anyRequest().authenticated() // Require authentication for all other requests
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS)) // Use stateless sessions for JWT
